@@ -76,7 +76,7 @@ def update_ukey_do( status_dict, req_queue) :
     end_time   = 0; 
     timer_cnt  = 0;
     timer_cnt_mod = 0;
-
+    print "First check of ukey"
     check_ukey_start_time = 0;
 
     while True :
@@ -94,12 +94,17 @@ def update_ukey_do( status_dict, req_queue) :
         #-- 每隔10s检测一次 --#
         if ( 10 < int( check_ukey_end_time - check_ukey_start_time)) :
             check_ukey_start_time = check_ukey_end_time;
-
+            
+            #print "OMG"
+            
             if (True == ukey_is_expired()) :
                 status_dict['expired'] = True;
             else :
                 status_dict['expired'] = False;
-
+                
+            #print "SHOW ME {0}".format(status_dict['expired'])
+            sys.stdout.write("\r"+str(time.time())+":BY Revo,Is expired? %s" % status_dict[ "expired"]);
+            sys.stdout.flush()
         data = None;
         try :
             data = req_queue.get( True, 1);
@@ -138,10 +143,10 @@ def update_ukey_do( status_dict, req_queue) :
 #-- 获取HOST和PORT --#
 execfile( "ukey.agent.conf");
 
-
+status_dict = {"expired": True};
 #-- 主程序入口 --#
 if __name__ == '__main__':
-    status_dict = {"expired": True};
+    
     req_queue   = Queue();
 
     #-- 启动一个线程实时更新UKEY --#
@@ -156,6 +161,7 @@ if __name__ == '__main__':
     while True :
         print "Is expired.", status_dict[ "expired"];
         try :
+            
             sock_clt, clt_addr = sock_ctx.accept();
             data = sock_clt.recv( 16);
             print str( clt_addr), " ==> Req: ", data
