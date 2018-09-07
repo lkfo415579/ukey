@@ -14,7 +14,6 @@ from ukey import *
 #-- 检测是否过期 --#
 def ukey_is_expired() :
     rc = False;
-
     try :
         ukey_ctx = UkeyMgr();
         ukey_ctx.enable_exception( False);
@@ -24,8 +23,10 @@ def ukey_is_expired() :
             else :
                 rc = False;
         else :
+	    print "Not Found Key"
             rc = True;
-    except Exception, e:
+    except Exception as e:
+	print "E:", e
         rc = True;
     return rc;
 #--end->Func: ukey_is_expired --#
@@ -39,8 +40,10 @@ def ukey_is_alive() :
         ukey_ctx.enable_exception( False);
 
         if (ukey_ctx.find_ukey() is None) :
+	    print "Not Found"
             rc = False;
         else :
+	    print "Found"
             rc = True;
     except :
         rc = False;
@@ -95,8 +98,6 @@ def update_ukey_do( status_dict, req_queue) :
         if ( 10 < int( check_ukey_end_time - check_ukey_start_time)) :
             check_ukey_start_time = check_ukey_end_time;
             
-            #print "OMG"
-            
             if (True == ukey_is_expired()) :
                 status_dict['expired'] = True;
             else :
@@ -146,7 +147,7 @@ execfile( "ukey.agent.conf");
 status_dict = {"expired": True};
 #-- 主程序入口 --#
 if __name__ == '__main__':
-    
+    print "Revo Edited:9/7/2018"    
     req_queue   = Queue();
 
     #-- 启动一个线程实时更新UKEY --#
@@ -161,7 +162,6 @@ if __name__ == '__main__':
     while True :
         print "Is expired.", status_dict[ "expired"];
         try :
-            
             sock_clt, clt_addr = sock_ctx.accept();
             data = sock_clt.recv( 16);
             print str( clt_addr), " ==> Req: ", data
@@ -178,7 +178,8 @@ if __name__ == '__main__':
                 sock_clt.send( "expired");
                 req_queue.put_nowait( (0, now_time));
 
-        except :
+        except Exception as e:
+	    print "error:", e
             data = None;
         print "Close";
         sock_clt.close();
